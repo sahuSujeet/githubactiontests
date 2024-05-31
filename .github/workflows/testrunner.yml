@@ -49,10 +49,18 @@ jobs:
       #     CI: false
       #   run: npm run build
         # run: yarn run build
+      # - name: Start Local Server
+      #   run: |
+      #     npm run dev &  # Start your local server in the background
+      #     sleep 10  # Wait a few seconds for the server to start
       - name: Start Local Server
         run: |
           npm run dev &  # Start your local server in the background
-          sleep 10  # Wait a few seconds for the server to start
+          for i in {1..30}; do
+            curl -sSf http://localhost:5173 && break
+            echo "Waiting for server to start..."
+            sleep 5
+          done
       - name: Download & Use Sauce Connect Tunnel  # Set up a Sauce Connect Proxy tunnel.
         run: |
           set -e
