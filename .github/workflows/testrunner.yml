@@ -112,8 +112,10 @@ jobs:
         with:
           username: ${{ secrets.SAUCE_USERNAME }}
           accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
-          region: eu-central
+          region: eu-central-1
           tunnelName: ${{ github.repository }}-${{ github.run_id }}
+          sauce-options: |-
+            --tmp-dir /path/to/custom/tmp/dir  # Replace with your desired path
       - name: Saucectl RUN
         uses: saucelabs/saucectl-run-action@v3
         with:
