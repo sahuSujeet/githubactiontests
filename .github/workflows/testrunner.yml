@@ -58,6 +58,7 @@ jobs:
           set -e
           curl -L -s https://saucelabs.com/downloads/sauce-connect/5.1.0/sauce-connect-5.1.0_linux.x86_64.tar.gz | sudo tar -xz
           sc-5.1.0-linux/bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY -i proxy-tunnel-$GITHUB_RUN_ID &
+          sleep 20  # Wait for the Sauce Connect tunnel to establish
       - name: Install Saucectl
         run: |
           curl -L -s https://github.com/saucelabs/saucectl/releases/download/v${SAUCECTL_VERSION}/saucectl_${SAUCECTL_VERSION}_linux_64-bit.tar.gz | sudo tar -xz -C /usr/bin/
