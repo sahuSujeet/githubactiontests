@@ -55,8 +55,8 @@ jobs:
         uses: saucelabs/saucectl-run-action@v3
         with:
           config-file: .sauce/config.yml
-          # tunnel-name: github-action-tunnel
-          tunnel-name: oauth-sujeetsahu294-e4685_tunnel_name
+          tunnel-name: github-action-tunnel
+          # tunnel-name: oauth-sujeetsahu294-e4685_tunnel_name
         env:
           SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
