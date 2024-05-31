@@ -1,0 +1,79 @@
+name: saucectl cypress tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+  SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+  SAUCECTL_VERSION: 0.176.0
+  BUILD_PREFIX: true
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Add this line
+
+jobs:
+  build-web-app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4   # to get the latest code from the repository.
+      - name: Set up Node.js
+        uses: actions/setup-node@v3  # to specify Node.js version 20.
+        with:
+          node-version: '20'
+      - name: Install Dependencies
+        run: npm install  # to install necessary Node.js packages.
+        # run: npm install -g yarn@berry
+      # - name: Run build
+      #   env:
+      #     CI: false
+      #   run: npm run build    # it would build the application (if necessary).
+      #   # run: yarn run build
+
+  test-web-app:
+    runs-on: ubuntu-latest
+    needs: build-web-app
+    steps:
+      # - name: Install Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.7
+      - name: Checkout GitHub App Code
+        uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: npm install
+        # run: npm install -g yarn@berry
+      # - name: Run Build
+      #   env: 
+      #     CI: false
+      #   run: npm run build
+        # run: yarn run build
+      - name: Start Local Server
+        run: |
+          npm run start &  # Start your local server in the background
+          sleep 5  # Wait a few seconds for the server to start
+      - name: Download & Use Sauce Connect Tunnel  # Set up a Sauce Connect Proxy tunnel.
+        run: |
+          set -e
+          curl -L -s https://saucelabs.com/downloads/sauce-connect/5.1.0/sauce-connect-5.1.0_linux.x86_64.tar.gz | sudo tar -xz
+          sc-5.1.0-linux/bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY -i proxy-tunnel-$GITHUB_RUN_ID &
+      - name: Install Saucectl
+        run: |
+          curl -L -s https://github.com/saucelabs/saucectl/releases/download/v${SAUCECTL_VERSION}/saucectl_${SAUCECTL_VERSION}_linux_64-bit.tar.gz | sudo tar -xz -C /usr/bin/
+      # - name: Saucectl Run
+      #   run: |
+      #     saucectl run -c ./.sauce/config.yml --tunnel-id proxy-tunnel-$GITHUB_RUN_ID --test-env sauce
+      - name: Saucectl RUN
+        uses: saucelabs/saucectl-run-action@v3
+        # with:
+        #   saucectl-version: latest
+        #   working-directory: .
+        #   config-file: .sauce/config.yml
+        #   skip-run: false
+        #   showConsoleLog: false
+        #   async: false
+        # env:
+        #   SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+        #   SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
