@@ -41,16 +41,16 @@
 #             echo "Waiting for server to start..."
 #             sleep 5
 #           done
-#       - name: Download & Use Sauce Connect Tunnel
-#         run: |
-#           set -e
-#           curl -L -s https://saucelabs.com/downloads/sauce-connect/5.1.0/sauce-connect-5.1.0_linux.x86_64.tar.gz | sudo tar -xz
-#           # sc-5.1.0-linux/bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY -i proxy-tunnel-$GITHUB_RUN_ID &
-#           sc run -u oauth-sujeetsahu294-e4685 -k *****7250 --region eu-central --tunnel-name oauth-sujeetsahu294-e4685_tunnel_name
-#           sleep 20  # Wait for the Sauce Connect tunnel to establish
-#       - name: Install Saucectl
-#         run: |
-#           curl -L -s https://github.com/saucelabs/saucectl/releases/download/v${SAUCECTL_VERSION}/saucectl_${SAUCECTL_VERSION}_linux_64-bit.tar.gz | sudo tar -xz -C /usr/bin/
+#       # - name: Download & Use Sauce Connect Tunnel  # manually downlaod
+#       #   run: |
+#       #     set -e
+#       #     curl -L -s https://saucelabs.com/downloads/sauce-connect/5.1.0/sauce-connect-5.1.0_linux.x86_64.tar.gz | sudo tar -xz
+#       #     # sc-5.1.0-linux/bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY -i proxy-tunnel-$GITHUB_RUN_ID &
+#       #     sc run -u oauth-sujeetsahu294-e4685 -k *****7250 --region eu-central --tunnel-name oauth-sujeetsahu294-e4685_tunnel_name
+#       #     sleep 20  # Wait for the Sauce Connect tunnel to establish
+#       # - name: Install Saucect   #manual installation
+#       #   run: |
+#       #     curl -L -s https://github.com/saucelabs/saucectl/releases/download/v${SAUCECTL_VERSION}/saucectl_${SAUCECTL_VERSION}_linux_64-bit.tar.gz | sudo tar -xz -C /usr/bin/
 #       - name: Saucectl RUN
 #         uses: saucelabs/saucectl-run-action@v3
 #         with:
@@ -63,55 +63,63 @@
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-name: Run Cypress Tests on Sauce Labs
 
-on: 
+name: saucectl cypress tests
+
+on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+
+env:
+  SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+  SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+  SAUCECTL_VERSION: 0.176.0
+  BUILD_PREFIX: true
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  test:
+  build-web-app:
     runs-on: ubuntu-latest
-
-    services:
-      web:
-        image: node:14
-        ports:
-          - 5173:5173
-        options: >-
-          --health-cmd="curl --fail http://localhost:5173 || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - name: Install Dependencies
+        run: npm install
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 14
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Start application
-      run: npm run dev &
-
-    - name: Wait for application to be ready
-      run: npx wait-on http://localhost:5173
-
-    - name: Set up Sauce Connect Proxy
-      uses: saucelabs/sauce-connect-action@v1
-      with:
-        username: ${{ secrets.SAUCE_USERNAME }}
-        access-key: ${{ secrets.SAUCE_ACCESS_KEY }}
-        cypress: true
-
-    - name: Run Cypress tests
-      run: npx cypress run --config baseUrl=http://localhost:5173,video=false --record --key ${{ secrets.CYPRESS_RECORD_KEY }}
+  test-web-app:
+    runs-on: ubuntu-latest
+    needs: build-web-app
+    steps:
+      - name: Checkout GitHub App Code
+        uses: actions/checkout@v4
+      - name: Install Dependencies
+        run: npm install
+      - name: Start Local Server
+        run: |
+          npm run dev &  # Start your local server in the background
+          for i in {1..30}; do
+            curl -sSf http://localhost:5173 && break
+            echo "Waiting for server to start..."
+            sleep 5
+          done
+      - name: Set up Sauce Connect
+        uses: saucelabs/sauce-connect-action@v2
+        with:
+          username: ${{ secrets.SAUCE_USERNAME }}
+          accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
+          region: eu-central
+          tunnelName: ${{ github.repository }}-${{ github.run_id }}
+      - name: Saucectl RUN
+        uses: saucelabs/saucectl-run-action@v3
+        with:
+          config-file: .sauce/config.yml
+          tunnel-name: ${{ github.repository }}-${{ github.run_id }}
+        env:
+          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
