@@ -45,7 +45,8 @@ jobs:
         run: |
           set -e
           curl -L -s https://saucelabs.com/downloads/sauce-connect/5.1.0/sauce-connect-5.1.0_linux.x86_64.tar.gz | sudo tar -xz
-          sc-5.1.0-linux/bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY -i proxy-tunnel-$GITHUB_RUN_ID &
+          # sc-5.1.0-linux/bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY -i proxy-tunnel-$GITHUB_RUN_ID &
+          sc run -u oauth-sujeetsahu294-e4685 -k *****7250 --region eu-central --tunnel-name oauth-sujeetsahu294-e4685_tunnel_name
           sleep 20  # Wait for the Sauce Connect tunnel to establish
       - name: Install Saucectl
         run: |
@@ -54,7 +55,8 @@ jobs:
         uses: saucelabs/saucectl-run-action@v3
         with:
           config-file: .sauce/config.yml
-          tunnel-name: github-action-tunnel
+          # tunnel-name: github-action-tunnel
+          tunnel-name: oauth-sujeetsahu294-e4685_tunnel_name
         env:
           SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
           SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
