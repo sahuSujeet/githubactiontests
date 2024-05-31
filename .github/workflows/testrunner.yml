@@ -51,7 +51,7 @@ jobs:
         # run: yarn run build
       - name: Start Local Server
         run: |
-          npm run start &  # Start your local server in the background
+          npm run dev &  # Start your local server in the background
           sleep 5  # Wait a few seconds for the server to start
       - name: Download & Use Sauce Connect Tunnel  # Set up a Sauce Connect Proxy tunnel.
         run: |
