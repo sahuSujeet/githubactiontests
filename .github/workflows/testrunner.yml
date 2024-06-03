@@ -99,29 +99,34 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Dependencies
         run: npm install
+      # - name: Start Local Server
+      #   run: |
+      #     npm run dev &  # Start your local server in the background
+      #     for i in {1..30}; do
+      #       curl -sSf http://localhost:5173 && break
+      #       echo "Waiting for server to start..."
+      #       sleep 5
+      #     done
       - name: Start Local Server
+        run: npm run dev &
+      - name: Wait for Server to Start
         run: |
-          npm run dev &  # Start your local server in the background
-          for i in {1..30}; do
-            curl -sSf http://localhost:5173 && break
-            echo "Waiting for server to start..."
-            sleep 5
-          done
-      - name: Set up Sauce Connect
-        uses: saucelabs/sauce-connect-action@v2
-        with:
-          username: ${{ secrets.SAUCE_USERNAME }}
-          accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
-          region: eu-central-1
-          tunnelName: ${{ github.repository }}-${{ github.run_id }}
-          # sauce-options: |-
-          #   --tmp-dir /path/to/custom/tmp/dir  # Replace with your desired path
-      - name: Saucectl RUN
-        uses: saucelabs/saucectl-run-action@v3
-        with:
-          config-file: .sauce/config.yml
-          tunnel-name: ${{ github.repository }}-${{ github.run_id }}
-        env:
-          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          node -e "const waitOn = require('wait-on'); waitOn({ resources: [{ host: 'localhost', port: 5173 }], timeout: 15000 }).catch(err => { console.error('Server failed to start:', err); process.exit(1); }); console.log('Server is ready!');"
+      # - name: Set up Sauce Connect
+      #   uses: saucelabs/sauce-connect-action@v2
+      #   with:
+      #     username: ${{ secrets.SAUCE_USERNAME }}
+      #     accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
+      #     region: eu-central-1
+      #     tunnelName: ${{ github.repository }}-${{ github.run_id }}
+      #     # sauce-options: |-
+      #     #   --tmp-dir /path/to/custom/tmp/dir  # Replace with your desired path
+      # - name: Saucectl RUN
+      #   uses: saucelabs/saucectl-run-action@v3
+      #   with:
+      #     config-file: .sauce/config.yml
+      #     tunnel-name: ${{ github.repository }}-${{ github.run_id }}
+      #   env:
+      #     SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+      #     SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
