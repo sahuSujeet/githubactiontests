@@ -107,6 +107,8 @@ jobs:
       #       echo "Waiting for server to start..."
       #       sleep 5
       #     done
+      - name: Install wait-on
+        run: npm install wait-on  # This line is added
       - name: Start Local Server
         run: npm run dev &
       - name: Wait for Server to Start
