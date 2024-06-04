@@ -64,72 +64,113 @@
 
 
 
-name: saucectl cypress tests
+# name: saucectl cypress tests
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# env:
+#   SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+#   SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+#   SAUCECTL_VERSION: 0.176.0
+#   BUILD_PREFIX: true
+#   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# jobs:
+#   build-web-app:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: '20'
+#       - name: Install Dependencies
+#         run: npm install
+
+#   test-web-app:
+#     runs-on: ubuntu-latest
+#     needs: build-web-app
+#     steps:
+#       - name: Checkout GitHub App Code
+#         uses: actions/checkout@v4
+#       - name: Install Dependencies
+#         run: npm install
+#       - name: Start Local Server
+#         run: |
+#           npm run dev &  # Start your local server in the background
+#       #     for i in {1..30}; do
+#       #       curl -sSf http://localhost:5173 && break
+#       #       echo "Waiting for server to start..."
+#       #       sleep 5
+#       #     done
+#       # - name: Set up Sauce Connect
+#       #   uses: saucelabs/sauce-connect-action@v2
+#       #   with:
+#       #     username: ${{ secrets.SAUCE_USERNAME }}
+#       #     accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
+#       #     region: eu-central-1
+#       #     tunnelName: ${{ github.repository }}-${{ github.run_id }}
+#       #     # sauce-options: |-
+#       #     #   --tmp-dir /path/to/custom/tmp/dir  # Replace with your desired path
+#       # - name: Saucectl RUN
+#       #   uses: saucelabs/saucectl-run-action@v3
+#       #   with:
+#       #     config-file: .sauce/config.yml
+#       #     tunnel-name: ${{ github.repository }}-${{ github.run_id }}
+#       #   env:
+#       #     SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+#       #     SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+#       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+
+
+name: Sauce Labs Tests
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-env:
-  SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-  SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-  SAUCECTL_VERSION: 0.176.0
-  BUILD_PREFIX: true
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  build-web-app:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - name: Install Dependencies
-        run: npm install
+  test-job:
+    runs-on: ubuntu-latest  # Or your preferred runner
 
-  test-web-app:
-    runs-on: ubuntu-latest
-    needs: build-web-app
     steps:
       - name: Checkout GitHub App Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - name: Install Dependencies
         run: npm install
-      # - name: Start Local Server
-      #   run: |
-      #     npm run dev &  # Start your local server in the background
-      #     for i in {1..30}; do
-      #       curl -sSf http://localhost:5173 && break
-      #       echo "Waiting for server to start..."
-      #       sleep 5
-      #     done
-      # - name: Install wait-on
-        # run: npm install wait-on  # This line is added
-      - name: Start Local Server
-        run: npm run dev 
-        # &
-      # - name: Wait for Server to Start
-      #   run: |
-      #     node -e "const waitOn = require('wait-on'); waitOn({ resources: [{ host: 'localhost', port: 5173 }], timeout: 15000 }).catch(err => { console.error('Server failed to start:', err); process.exit(1); }); console.log('Server is ready!');"
-      # - name: Set up Sauce Connect
-      #   uses: saucelabs/sauce-connect-action@v2
-      #   with:
-      #     username: ${{ secrets.SAUCE_USERNAME }}
-      #     accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
-      #     region: eu-central-1
-      #     tunnelName: ${{ github.repository }}-${{ github.run_id }}
-      #     # sauce-options: |-
-      #     #   --tmp-dir /path/to/custom/tmp/dir  # Replace with your desired path
-      # - name: Saucectl RUN
-      #   uses: saucelabs/saucectl-run-action@v3
-      #   with:
-      #     config-file: .sauce/config.yml
-      #     tunnel-name: ${{ github.repository }}-${{ github.run_id }}
-      #   env:
-      #     SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-      #     SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Sauce Credentials
+        env:
+          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: |
+          echo "SAUCE_USERNAME=$SAUCE_USERNAME" >> $GITHUB_ENV  # Optional for visibility (remove if using secrets)
+          echo "SAUCE_ACCESS_KEY=*** (secure)" >> $GITHUB_ENV  # Mask access key
+
+      - name: Download Sauce Connect Proxy
+        uses: saucelabs/sauce-connect-action@v2  # Adjust version as needed
+        with:
+          username: ${{ env.SAUCE_USERNAME }}
+          accessKey: ${{ env.SAUCE_ACCESS_KEY }}
+
+      - name: Start Sauce Connect Tunnel (modify options as needed)
+        run: |
+          ./sauce-connect -u ${{ env.SAUCE_USERNAME }} \
+                          -k ${{ env.SAUCE_ACCESS_KEY }} \
+                          --tunnel-identifier my-tunnel-id \  # Optional custom identifier
+                          --no-ssl-bump-check  # Optional, disable SSL bump check for self-signed certs
+
+      - name: Run Your Local Server Tests (replace with your command)
+        run: |
+          # Replace with your local server startup command
+          npm run dev # Example for a Node.js server
+
+      - name: Stop Sauce Connect Tunnel
+        run: ./sauce-connect -q -a stop my-tunnel-id  # Quiet mode, stop using identifier
+
