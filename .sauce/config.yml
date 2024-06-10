@@ -24,13 +24,6 @@ suites:
     shard: spec # (optional) Allocate one VM per spec for a high degree of parallelism.
     config:
       specPattern: [ "cypress/e2e/**/*.*" ] # Cypress native glob support.
-  # - name: "Firefox on Mac"
-  #   browser: "firefox"
-  #   browserVersion: "latest"
-  #   shard: spec
-  #   platformName: "macOS 12"
-  #   config:
-  #     specPattern: [ "cypress/e2e/**/*.*" ]
 
 # Controls what artifacts to fetch when the suites have finished.
 artifacts:
@@ -39,4 +32,6 @@ artifacts:
     match:
       - console.log
     directory: ./artifacts/
-
+    
+tunnel:
+  name: ${{ github.repository }}-${{ github.run_id }}

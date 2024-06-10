@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>transmission test</title>
+
+  <script src="/e2e/initializer.js"></script>
+  <script crossorigin="anonymous" defer src="/target/eum.min.js"></script>
+  <script>
+    eum('apiKey', 'key_0');
+    if (window.location.href.indexOf('withMultiBackends=true') !== -1) {
+      eum('reportingBackends', [{ reportingUrl: '/beacon', key: 'key_1' }, { reportingUrl: '/beacon_2', key: 'key_2' }]);
+    }
+
+    if (window.location.href.indexOf('withRequestBatching=true') !== -1) {
+      eum('beaconBatchingTime', 1000);
+    } else {
+      eum('beaconBatchingTime', 0);
+    }
+
+    eum('reportEvent', 'firstEvent', {
+      duration: 42,
+      meta: {
+        customEvent: '1'
+      }
+    });
+
+    eum('reportEvent', 'secondEvent', {
+      duration: 43,
+      meta: {
+        foo: 'bar'
+      }
+    });
+  </script>
+</head>
+<body>
+  ajax after page load
+
+  <div id="result"></div>
+</body>
+</html>
