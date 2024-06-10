@@ -112,7 +112,9 @@ jobs:
             sleep 5
           done
       - name: Create PID File Directory
-        run: mkdir -p /tmp/sauce-connect
+        run: |
+         mkdir -p /tmp/sauce-connect
+         ls -la /tmp  # Print out the contents of /tmp for debugging
       - name: Download and Set up Sauce Connect
         uses: saucelabs/sauce-connect-action@v2  # The saucelabs/sauce-connect-action step in your GitHub Actions workflow downloads and sets up Sauce Connect Proxy. 
         with:                                    
