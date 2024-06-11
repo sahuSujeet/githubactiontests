@@ -130,9 +130,11 @@ jobs:
             exit 1
           fi
         shell: /usr/bin/bash -e {0}
+      - name: Verify Server
+        run: curl -I http://localhost:5173
       - name: Create PID File Directory
         run: |
-         mkdir -p /tmp/sc_client-sahuSujeet/githubactiontests-9443806221
+         mkdir -p /tmp/sauce-connect  # mkdir -p /tmp/sc_client-sahuSujeet/githubactiontests-9443806221
          ls -la /tmp  # Print out the contents of /tmp for debugging
       - name: Download and Set up Sauce Connect
         uses: saucelabs/sauce-connect-action@v2  # The saucelabs/sauce-connect-action step in your GitHub Actions workflow downloads and sets up Sauce Connect Proxy. 
@@ -146,7 +148,7 @@ jobs:
           sauce-options: |    # The creation of the /tmp/sauce-connect directory is specifically for the GitHub Actions workflow environment and does not involve any changes to your local directory or filesystem. The purpose of creating this directory within the GitHub Actions workflow is to ensure that Sauce Connect has a location to write the PID (Process ID) file during its execution within the workflow. This step is necessary for Sauce Connect to function properly within the GitHub Actions environment.
             --pidfile=/tmp/sauce-connect/sc_client-${{ github.repository }}-${{ github.run_id }}.pid  
       - name: Check Sauce Connect Log
-        run: cat /tmp/sauce-connect-action*/sauce-connect.log
+        run: cat /tmp/sauce-connect-action*/sauce-connect.log  
       - name: Saucectl RUN
         uses: saucelabs/saucectl-run-action@v3
         with:
