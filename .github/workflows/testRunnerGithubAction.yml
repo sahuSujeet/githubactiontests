@@ -116,7 +116,7 @@ jobs:
           echo "Starting local server..."
           npm run dev &  # Start your local server in the background
           echo "Waiting for server to start..."
-          for i in {1..30}; do
+          for i in {1..60}; do
             if curl -sSf http://localhost:5173 > /dev/null; then
               echo "Server is up and running!"
               break
