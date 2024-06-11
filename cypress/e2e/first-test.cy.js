@@ -1,6 +1,6 @@
 describe('template spec', () => {
     it('passes', () => {
-      cy.visit('http://localhost:5173/');
+      cy.visit('/');
       cy.get("li").should("have.length",6);
     })
   })

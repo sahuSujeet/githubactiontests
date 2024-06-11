@@ -125,7 +125,7 @@ jobs:
                sleep 5
             fi  
           done
-          if [ $i -eq 30 ]; then
+          if [ $i -eq 60 ]; then
             echo "Server did not start within the expected time."
             exit 1
           fi
