@@ -149,8 +149,9 @@ jobs:
             --pidfile=/tmp/sauce-connect/sc_client-${{ github.repository }}-${{ github.run_id }}.pid  
       # - name: Check Sauce Connect Log
       #   run: cat /tmp/sauce-connect-action*/sauce-connect.log  
-      - name: Verify Sauce Connect Tunnel  # verify
-        run: curl -v -I http://localhost:5173 --proxy 127.0.0.1:4445
+      
+      # - name: Verify Sauce Connect Tunnel  # verify
+      #   run: curl -v -I http://localhost:5173 --proxy 127.0.0.1:4445
       - name: Saucectl RUN
         uses: saucelabs/saucectl-run-action@v3
         with:
