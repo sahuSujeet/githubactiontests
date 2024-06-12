@@ -130,7 +130,7 @@ jobs:
             exit 1
           fi
         shell: /usr/bin/bash -e {0}
-      - name: Verify Server
+      - name: Verify Server  #verify comments
         run: curl -I http://localhost:5173
       - name: Create PID File Directory
         run: |
