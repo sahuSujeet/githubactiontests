@@ -143,8 +143,8 @@ jobs:
           accessKey: ${{ secrets.SAUCE_ACCESS_KEY }}
           region: eu-central-1                 
           tunnelName: ${{ github.repository }}-${{ github.run_id }} #This proxy establishes a secure tunnel between Sauce Labs and your local environment. The tunnel-name is an identifier for the Sauce Connect tunnel. It can be any custom string you choose, but using tunnel-name: ${{ github.repository }}-${{ github.run_id }} ensures a unique name for each run of your GitHub Actions workflow. This is particularly useful in CI/CD environments to avoid conflicts between multiple concurrent runs and to easily trace which tunnel corresponds to which workflow run.
-          connectRetries: 3
-          connectRetryTimeout: 30000  # 30 seconds
+          # connectRetries: 3
+          # connectRetryTimeout: 30000  # 30 seconds
           sauce-options: |    # The creation of the /tmp/sauce-connect directory is specifically for the GitHub Actions workflow environment and does not involve any changes to your local directory or filesystem. The purpose of creating this directory within the GitHub Actions workflow is to ensure that Sauce Connect has a location to write the PID (Process ID) file during its execution within the workflow. This step is necessary for Sauce Connect to function properly within the GitHub Actions environment.
             --pidfile=/tmp/sauce-connect/sc_client-${{ github.repository }}-${{ github.run_id }}.pid  
       # - name: Check Sauce Connect Log
